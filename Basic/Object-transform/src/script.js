@@ -140,8 +140,8 @@ const canvas = document.querySelector("canvas.webgl");
 
 // Sizes
 const sizes = {
-  width: 800,
-  height: 600,
+  width: window.innerWidth,
+  height: window.innerHeight,
 };
 
 // Cursor
@@ -153,7 +153,6 @@ const cursor = {
 window.addEventListener("mousemove", (event) => {
   cursor.x = event.clientX / sizes.width - 0.5;
   cursor.y = -(event.clientY / sizes.height - 0.5);
-  console.log(cursor.x, cursor.y);
 });
 
 // Scene
@@ -172,7 +171,7 @@ scene.add(mesh);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  55,
   sizes.width / sizes.height,
   0.1,
   100
@@ -191,6 +190,36 @@ const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
 });
 renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+
+// Resize window
+window.addEventListener("resize", () => {
+  // update size
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+  // update camera aspect ratio
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+});
+
+// fullscreen
+window.addEventListener("dblclick", () => {
+  const fullScreen =
+    document.fullscreenElement || document.webkitFullscreenElement;
+  if (!fullScreen) {
+    canvas.requestFullscreen
+      ? canvas.requestFullscreen()
+      : canvas.webkitRequestFullscreen && canvas.webkitRequestFullscreen();
+    console.log("request");
+  } else {
+    console.log("exit");
+    document.exitFullscreen
+      ? document.exitFullscreen()
+      : document.webkitExitFullscreen && document.webkitExitFullscreen();
+  }
+});
 
 // Animate
 const clock = new THREE.Clock();
@@ -200,9 +229,10 @@ const tick = () => {
 
   // Update controls
   controls.update();
-  camera.position.x = Math.sin(cursor.x * 2);
-  //   camera.position.y = cursor.y * Math.PI * 2;
-  //   camera.lookAt(mesh.position);
+  // camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 3;
+  // camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 3;
+  // camera.position.y = cursor.y * 10;
+  // camera.lookAt(mesh.position);
   // Render
   renderer.render(scene, camera);
 
